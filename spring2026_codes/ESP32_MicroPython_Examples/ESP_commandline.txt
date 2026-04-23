@@ -1,0 +1,10 @@
+sudo apt-get update
+sudo apt-get upgrade
+pip install --upgrade pip
+pip install esptool
+cd Desktop/ESP32_MicroPython_Examples/
+esptool.py --port /dev/ttyUSB0 erase_flash
+sudo esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 460800 write_flash -z 0x1000 ESP32_GENERIC-20241129-v1.24.1.bin
+ls /dev/tty*
+
+

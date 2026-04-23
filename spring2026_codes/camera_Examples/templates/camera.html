@@ -1,0 +1,34 @@
+<!-- ==== html frontend for flask app for IoT applications
+==== Source code written by Prof. Kartik Bulusu
+==== CS and MAE Department, SEAS GWU
+==== Description:
+======== flask API implementation for IoT demonstration in CS3907   
+======== This program incorporates the picamera2, cv2 and flask library
+==== Reference: 
+==== 1. https://towardsdatascience.com/web-visualization-with-plotly-and-flask-3660abf9c946
+==== 2. https://www.youtbe.com/watch?v=i9mJzdLYsVo
+==== Requirements:
+======== It has been written exclusively for MAE6291 students in GWU.
+======== It may not be used for any other purposes unless author's prior permission is aquired.
+==== Testing:
+==== 1. Developed on 03/07/2023 using VSCode on Macbook Pro 
+==== 2. Tested on 03/09/2023 on Python 3.5.3 on Raspberry Pi 3B+
+==== 3. Modified on 03/10/2023 using VSCode on Macbook Pro  
+==== 4. Revised and tested on 03/18/2025 on Raspberry Pi 4-->
+
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      img { display: block; 
+            margin-left: auto;
+            margin-right: auto;
+          }
+      h1 {text-align: center;}
+    </style>
+  </head>
+  <body>
+    <h1>Prof. Bulusu's Camera</h1>
+    <img id="bg" src="{{ url_for('video_feed') }}" style="width:88&;">
+  </body>
+</html>

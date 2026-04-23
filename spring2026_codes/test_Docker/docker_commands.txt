@@ -1,0 +1,75 @@
+#=========== List of Docker commands to be implemented in the terminal ===============#
+
+docker run hello-world
+
+--> Explanation <--
+
+To test your Docker installation, you can run the official "Hello World" image, which verifies that the Docker client, daemon, and Hub connectivity are all functioning correctly.
+The Docker client contacted the Docker daemon.
+The daemon pulled the "hello-world" image from Docker Hub.
+The daemon created and ran a container from that image.
+The daemon streamed the output back to your terminal.
+
+#===========
+
+docker build -t python-app:latest .
+
+--> Explanation <--
+
+python-app is the image name, latest is the tag
+
+. tells Docker to use the current directory as the build context
+
+#===========
+
+docker images
+
+--> Explanation <--
+
+Confirms the images 
+
+#===========
+
+docker run -d -p 8000:8000 --name python-app-container python-app:latest
+
+--> Explanation <--
+
+-d runs it in the background.
+
+-p 8000:8000 maps host port 8000 to container port 8000 so you can reach it at http://localhost:8000.
+
+--name python-app-container gives the container a friendly name.
+
+#===========
+
+docker ps
+
+--> Explanation <--
+
+Check if the image created earlier is running
+
+#===========
+
+docker stop python-app-container
+
+--> Explanation <--
+
+Stops container from running
+
+#===========
+
+docker rm python-app-container
+
+--> Explanation <--
+
+Removes container from Docker completely
+
+#===========
+
+docker image rm python-app:latest
+# or
+docker rmi python-app:latest
+
+--> Explanation <--
+
+Removes image from Docker completely
