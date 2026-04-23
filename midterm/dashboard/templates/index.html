@@ -1,0 +1,234 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Neocoast Cluster</title>
+  <script src="/static/plotly-latest.min.js"></script>
+
+  <style>
+    :root{
+      --bg0:#05060b;
+      --bg1:#0b1020;
+      --stroke: rgba(255,255,255,0.12);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.60);
+      --green:#30d158;
+      --red:#ff453a;
+      --blue:#58a6ff;
+      --purple:#7c5cff;
+    }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color: var(--text);
+      background:
+        radial-gradient(900px 500px at 15% 10%, rgba(88,166,255,0.25) 0%, transparent 60%),
+        radial-gradient(900px 500px at 90% 10%, rgba(124,92,255,0.22) 0%, transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow-x:hidden;
+    }
+
+    .wrap{ max-width: 1180px; margin: 0 auto; padding: 22px; }
+
+    .top{
+      display:flex; align-items:flex-end; justify-content:space-between;
+      margin-bottom: 14px;
+    }
+
+    .brand{ display:flex; flex-direction:column; gap:4px; }
+    .brand h1{ margin:0; font-size: 34px; }
+    .brand .sub{ color: var(--muted); font-size: 13px; }
+
+    .rightMeta{ color: var(--muted); font-size: 13px; }
+
+    .cluster{
+      border-radius: 22px;
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      box-shadow: 0 20px 50px rgba(0,0,0,0.55);
+      padding: 16px;
+      position: relative;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 0.8fr 1fr;
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .dial{
+      border-radius: 18px;
+      border: 1px solid var(--stroke);
+      background: rgba(0,0,0,0.26);
+      padding: 10px;
+      min-height: 360px;
+    }
+
+    .center{
+      border-radius: 18px;
+      border: 1px solid var(--stroke);
+      background: rgba(0,0,0,0.26);
+      padding: 18px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      min-height: 360px;
+    }
+
+    .chips{
+      display:flex;
+      gap:10px;
+      margin-bottom: 10px;
+    }
+
+    .chip{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.05);
+      font-weight: 800;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .dot{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      background: var(--muted);
+    }
+
+    .statusLine{
+      text-align:center;
+      font-weight: 800;
+      letter-spacing:0.4px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.75);
+    }
+
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">
+        <h1>Neocoast Cluster</h1>
+        <div class="sub">Instrument-style telemetry • speed / accel / mode</div>
+      </div>
+      <div class="rightMeta">
+        Pi-hosted • <span id="ts">—</span>
+      </div>
+    </div>
+
+    <div class="cluster">
+      <div class="grid">
+        <div class="dial" id="dialSpeed"></div>
+
+        <div class="center">
+          <div>
+            <div class="chips">
+              <div class="chip">
+                <span class="dot" id="modeDot"></span>
+                <span id="modeChip">—</span>
+              </div>
+              <div class="chip">
+                <span class="dot" id="motionDot"></span>
+                <span id="motionChip">—</span>
+              </div>
+            </div>
+
+            <div style="color:var(--muted); font-size:12px; margin-bottom:14px;">
+              Last update: <span id="ts2">—</span>
+            </div>
+
+            <div class="statusLine">
+              Speed: <span id="speedInline">—</span> m/s •
+              Accel: <span id="amagInline">—</span> m/s²
+            </div>
+          </div>
+        </div>
+
+        <div class="dial" id="dialAccel"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  function makeDial(divId, title, max, unit, color){
+    const data = [{
+      type: "indicator",
+      mode: "gauge+number",
+      value: 0,
+      title: { text: title, font: {size: 16, color: "rgba(255,255,255,0.78)"} },
+      number: { suffix: " " + unit, font: {size: 44, color: "rgba(255,255,255,0.94)"} },
+      gauge: {
+        shape: "angular",
+        axis: {
+          range: [0, max],
+          tickcolor: "rgba(255,255,255,0.25)",
+          tickfont: {color: "rgba(255,255,255,0.45)"},
+          dtick: max/6
+        },
+        bar: { color: color, thickness: 0.22 },
+        bgcolor: "rgba(0,0,0,0)",
+        bordercolor: "rgba(255,255,255,0.14)",
+        steps: [
+          { range: [0, max*0.65], color: "rgba(48,209,88,0.10)" },
+          { range: [max*0.65, max*0.85], color: "rgba(255,159,10,0.12)" },
+          { range: [max*0.85, max], color: "rgba(255,69,58,0.12)" }
+        ]
+      }
+    }];
+
+    Plotly.newPlot(divId, data, {
+      margin: {t: 40, b: 12, l: 18, r: 18},
+      paper_bgcolor: "rgba(0,0,0,0)"
+    }, {displayModeBar:false, responsive:true});
+  }
+
+  makeDial("dialSpeed", "SPEED", 8.0, "m/s", "rgba(88,166,255,0.95)");
+  makeDial("dialAccel", "ACCEL", 12.0, "m/s²", "rgba(124,92,255,0.95)");
+
+  function setChip(textId, dotId, text, dotColor){
+    document.getElementById(textId).textContent = text;
+    document.getElementById(dotId).style.background = dotColor;
+  }
+
+  async function refresh(){
+    const r = await fetch("/api/state", {cache:"no-store"});
+    const s = await r.json();
+
+    const mode = s.daymode ? "DAYMODE" : "NIGHTMODE";
+    const motion = (s.motion || "—").toUpperCase();
+
+    setChip("modeChip","modeDot", mode, s.daymode ? "rgba(88,166,255,0.95)" : "rgba(124,92,255,0.95)");
+    setChip("motionChip","motionDot", motion, motion==="MOVING" ? "rgba(48,209,88,0.95)" : "rgba(255,69,58,0.95)");
+
+    document.getElementById("speedInline").textContent = (s.speed ?? 0).toFixed(2);
+    document.getElementById("amagInline").textContent  = (s.amag ?? 0).toFixed(2);
+
+    const t = new Date((s.ts ?? 0)*1000).toLocaleTimeString();
+    document.getElementById("ts").textContent  = t;
+    document.getElementById("ts2").textContent = t;
+
+    Plotly.restyle("dialSpeed", "value", [(s.speed ?? 0)]);
+    Plotly.restyle("dialAccel", "value", [(s.amag ?? 0)]);
+  }
+
+  setInterval(refresh, 200);
+  refresh();
+</script>
+</body>
+</html>
